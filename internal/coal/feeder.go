@@ -53,7 +53,8 @@ func (m *FeederManager) Start(beltID string) error {
 		return quota.ErrQuotaExhausted
 	}
 	m.attempts[beltID]++
-	if m.gate != nil && m.gate.Ready(beltID) {
+	// 皮带未就绪时才应拒绝给煤（错误信息即“belt is not ready for feeding”）。
+	if m.gate != nil && !m.gate.Ready(beltID) {
 		m.RecordOrder(beltID, "rejected")
 		m.lastReject[beltID] = errBeltNotReady
 	}
