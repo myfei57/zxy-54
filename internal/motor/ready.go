@@ -23,5 +23,11 @@ func (c *Controller) ConfirmReady(beltID string) error {
 	if _, ok := c.line.Belt(beltID); !ok {
 		return errBeltNotFound
 	}
+	// 重载启动时必须先确认皮带就绪，再释放制动；否则制动松开后皮带会在
+	// 负荷作用下倒溜，撞击尾部挡煤板。这里真正落下就绪标记，供制动释放前校验。
+	if !c.line.IsReady(beltID) {
+		return errNotReadyBelt
+	}
+	c.readySeq[beltID]++
 	return nil
 }

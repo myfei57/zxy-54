@@ -10,6 +10,11 @@ func (m *Manager) Release(beltID string) error {
 	if !ok {
 		return errBrakeNotFound
 	}
+	// 制动释放必须发生在皮带就绪确认之后；未确认就绪时禁止松闸，
+	// 防止重载启动时皮带倒溜撞击尾部挡煤板。
+	if m.ready != nil && !m.ready.Ready(beltID) {
+		return errNotReady
+	}
 	b.Engaged = false
 	m.recordRelease(beltID, "released")
 	return nil
