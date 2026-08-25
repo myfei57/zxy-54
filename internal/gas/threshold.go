@@ -12,6 +12,11 @@ func (m *Manager) Calibrate(id string, threshold float64) error {
 	}
 	s.Threshold = threshold
 	s.Version++
+	// Notify listeners (e.g. the interlock) so the new threshold takes effect
+	// immediately instead of continuing to judge against the pre-calibration value.
+	if m.onCalibrate != nil {
+		m.onCalibrate(id)
+	}
 	return nil
 }
 
