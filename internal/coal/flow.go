@@ -19,8 +19,10 @@ func NewTransit(beltID string, scale *belt.Scale, interval float64) *Transit {
 }
 
 func (t *Transit) Tick() {
-	t.total += t.inst * t.interval
+	// 先读数后累计：让瞬时流量与累计量基于同一时刻的采样，
+	// 保证调度按流量配煤时 inst 与 total 一致。
 	t.inst = t.scale.Read()
+	t.total += t.inst * t.interval
 	if t.inst > t.peak {
 		t.peak = t.inst
 	}
